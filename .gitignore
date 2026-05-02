@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Build / dist
+build/
+dist/
+
+# Local-only intermediate outputs (regenerable)
+leakfusion/data/alerts.json
+leakfusion/data/alerts_ml.json
+leakfusion/data/residuals.csv
+leakfusion/data/residuals.parquet
+leakfusion/data/residuals_v2.csv
+leakfusion/data/residuals_v2.parquet
+leakfusion/data/healthy_baseline.csv
+leakfusion/data/healthy_baseline.parquet
+leakfusion/data/healthy_baseline.parque
+leakfusion/data/leak_labeled.csv
+leakfusion/data.zip
+leakfusion/data-copy/
+
+# Legacy UI (kept locally, not pushed)
+leakfusion/ui/streamlit_app_legacy.py
+
+# Pre-fit models — shared out-of-band via Google Drive (see README.md)
+leakfusion/models/
+
+# Internal-only: kept locally, not pushed
+PUSH_TO_GITHUB.md
+docs/
