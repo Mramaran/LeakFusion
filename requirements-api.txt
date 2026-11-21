@@ -5,7 +5,8 @@ pandas>=2.0
 numpy>=1.24
 pyarrow>=14.0
 scipy>=1.11
-scikit-learn>=1.5
+# Pinned to the version the .joblib models were pickled with.
+scikit-learn==1.8.0
 xgboost>=2.1
 joblib>=1.4
 fastapi==0.115.0
