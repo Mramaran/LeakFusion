@@ -1,0 +1,11 @@
+name = "leakfusion-keepalive"
+main = "index.js"
+compatibility_date = "2025-01-01"
+
+[triggers]
+# Every 6 hours — well inside the Space's ~48h inactivity window.
+crons = ["0 */6 * * *"]
+
+[vars]
+# Replace with your Space's direct URL (Space page → ⋮ → "Embed this Space").
+SPACE_URL = "https://YOUR-USERNAME-leakfusion.hf.space"

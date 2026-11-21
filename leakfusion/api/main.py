@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from io import StringIO
 from pathlib import Path
 
@@ -8,6 +9,8 @@ import joblib
 import pandas as pd
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from leakfusion.api.adapter import residuals_and_events_to_readings
 from leakfusion.api.schemas import ProcessResponse, SampleListItem
@@ -19,6 +22,9 @@ from leakfusion.src.load_estimator import add_load_fraction_column
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 MODELS_DIR = PROJECT_ROOT / "leakfusion" / "models"
 SAMPLES_DIR = PROJECT_ROOT / "leakfusion" / "data" / "demo_samples"
+# Built React app (web/dist). Served by FastAPI when present so a single
+# container (e.g. a Hugging Face Space) hosts both the UI and /api/*.
+WEB_DIST = Path(os.environ.get("LEAKFUSION_WEB_DIST", PROJECT_ROOT / "web" / "dist"))
 
 _artifacts_cache: dict = {}
 
@@ -50,7 +56,10 @@ app = FastAPI(title="LeakFusion API", version="0.1.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"] + [
+        o.strip() for o in os.environ.get("LEAKFUSION_CORS_ORIGINS", "").split(",")
+        if o.strip()
+    ],
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
@@ -114,3 +123,19 @@ async def process_upload(file: UploadFile = File(...)):
         "readings": [r.model_dump() for r in readings],
         "event_count": len(events),
     }
+
+
+# --- Static frontend (production / Hugging Face Space) ----------------------
+# Registered last so every /api/* route above takes precedence.
+if (WEB_DIST / "index.html").exists():
+    if (WEB_DIST / "assets").is_dir():
+        app.mount("/assets", StaticFiles(directory=WEB_DIST / "assets"), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def spa(full_path: str):
+        if full_path.startswith("api/"):
+            raise HTTPException(404, "Not found")
+        candidate = (WEB_DIST / full_path).resolve()
+        if full_path and candidate.is_file() and candidate.is_relative_to(WEB_DIST.resolve()):
+            return FileResponse(candidate)
+        return FileResponse(WEB_DIST / "index.html")

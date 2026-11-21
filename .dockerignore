@@ -1,0 +1,13 @@
+.git
+**/__pycache__
+**/*.pyc
+**/node_modules
+web/dist
+.venv
+venv
+leakfusion/tests
+leakfusion/data/*.parquet
+syn-engine/*.parquet
+syn-engine/*.csv
+syn-engine/tests
+deploy
